@@ -57,7 +57,7 @@ You can add custom derivatives using `@diffrule` macro.
 
 ```julia
 logistic(x) = 1 / (1 + exp(-x))
-# for an expression like `logistic(x)` where x is a Number
+# for an expression like `y = logistic(x)` where x is a Number
 # gradient w.r.t. x
 # is `(logistic(x) * (1 - logistic(x)) * ds)` where "ds" stands for derivative "dL/dy"
 @diffrule logistic(x::Number) x (logistic(x) * (1 - logistic(x)) * ds)
@@ -65,6 +65,30 @@ logistic(x) = 1 / (1 + exp(-x))
 L(x) = sum(logistic.(x))
 val, g = grad(L, rand(5))
 ```
+
+For functions accepting keyword arguments use `@diffrule_kw` instead:
+
+```julia
+import NNlib: conv, ∇conv_data, ∇conv_filter
+
+@diffrule_kw conv(x, w) x ∇conv_data(ds, w)
+@diffrule_kw conv(x, w) w ∇conv_filter(ds, x)
+```
+
+During reverse pass Yota will generate call to derivative function with the same keyword arguments that were
+passed to the original one. For example, if you have:
+
+```julia
+conv(A, W; pad=1)
+```
+
+corresponding derivative will be:
+
+```julia
+∇conv_data(ds, w; pad=1)
+```
+
+There's also `@nodiff(call_pattern, variable)` macro which stops Yota from backpropagating through that variable.
 
 ## Tracer and the Tape
 
@@ -87,7 +111,7 @@ print(tape)
 #   %3 = broadcast(%2, %1)::Array{Float64,1}
 #   %4 = sum(%3)::Float64
 ```
-`trace` uses [Cassette.jl](https://github.com/jrevels/Cassette.jl/) to collect function calls during execution. Functions are divided into 2 groups:
+`trace` uses [JuliaInterpreter.jl](https://github.com/JuliaDebug/JuliaInterpreter.jl) to collect function calls during execution. Functions are divided into 2 groups:
 
  * primitive, which are recorded to the tape;
  * non-primitive, which are traced-through down to primitive ones.
@@ -111,6 +135,8 @@ compile!(tape)
 @btime play!(tape, x)
 # 492.063 ns (2 allocations: 144 bytes)
 ```
+
+Note that `trace()` is an alias to `itrace()` - JuliaInterpreter-based tracer. Older versions of Yota used another implementation with identical interface and capabilities, but based on [Cassette.jl](https://github.com/jrevels/Cassette.jl). This implementation is still available by name `ctrace()`.
 
 ## CuArrays support (experimental)
 

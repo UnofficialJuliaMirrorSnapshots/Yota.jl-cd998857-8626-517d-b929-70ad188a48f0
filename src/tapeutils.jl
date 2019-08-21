@@ -209,11 +209,23 @@ that was used to create that field.
 NOTE: This works only with getfield() on tuples
 """
 function find_tuple_field_source_var(tape::Tape, getf_op::Call)
-    ind_it_op = tape[getf_op.args[1]]
-    @assert ind_it_op isa Call && ind_it_op.fn == Base.indexed_iterate
-    tuple_op = tape[ind_it_op.args[1]]
-    @assert tuple_op isa Call && tuple_op.fn == __tuple__
-    tuple_idx = tape[ind_it_op.args[2]].val
+    getf_base_op = tape[getf_op.args[1]]  
+    if getf_base_op.fn == Base.indexed_iterate
+        tuple_op = tape[getf_base_op.args[1]]
+        tuple_idx = tape[ind_it_op.args[2]].val
+    elseif getf_base_op.fn == __tuple__
+        tuple_op = getf_base_op
+        tuple_idx = tape[getf_op.args[2]].val
+    elseif getf_base_op.fn == namedtuple
+        tuple_op = tape[getf_base_op.args[2]]
+        tuple_fld = tape[getf_op.args[2]].val
+        flds = fieldnames(typeof(getf_base_op.val))
+        tuple_idx = findfirst(x -> x == tuple_fld, flds)
+        # should make recursive?
+    else
+        throw(AssertionError("Unexpected base op for __getfield__: $(getf_base_op.fn)"))
+    end
+    # @assert tuple_op isa Call && tuple_op.fn == __tuple__
     src_var = tape[tuple_op.args[tuple_idx]]
     return src_var
 end
