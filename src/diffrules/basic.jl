@@ -2,27 +2,27 @@
 #                        BASIC RULES                                  #
 #######################################################################
 
-@diffrule length(u)    u     0.0
+@nodiff length(u)    u
 
-@diffrule size(u)      u     0.0
-@diffrule size(u,v)    u     0.0
-@diffrule size(u,v)    v     0.0
+@nodiff size(u)      u
+@nodiff size(u,v)    u
+@nodiff size(u,v)    v
 
-@diffrule fill(u,v)    u     0.0
-@diffrule fill(u,v)    v     0.0
+@nodiff fill(u,v)    u
+@nodiff fill(u,v)    v
 
-@diffrule similar(u,v) u     0.0
-@diffrule similar(u,v) v     0.0
+@nodiff similar(u,v) u
+@nodiff similar(u,v) v
 
-@diffrule zeros(u)     u     0.0
+@nodiff zeros(u)     u
+@nodiff zero(u)     u
 
-@diffrule ones(u)      u     0.0
+@nodiff ones(u)      u
+@nodiff one(u)     u
 
-# @diffrule cell(x)      x     0.0
+@nodiff sign(u)      u
 
-@diffrule sign(u)      u     0.0
-
-@diffrule reverse(u)   u     0.0
+# @diffrule reverse(u)   u     0.0
 
 # tuple
 @diffrule tuple(u)        u     dy[1]
@@ -85,12 +85,12 @@
 @diffrule getindex(u::AbstractArray, i)         u    ungetindex(u, dy, i)
 @diffrule getindex(u::AbstractArray, i, j)      u    ungetindex(u, dy, i, j)
 @diffrule getindex(u::AbstractArray, i, j, k)   u    ungetindex(u, dy, i, j, k)
-@diffrule getindex(u::AbstractArray, i)         i    0
-@diffrule getindex(u::AbstractArray, i, j)      i    0
-@diffrule getindex(u::AbstractArray, i, j)      j    0
-@diffrule getindex(u::AbstractArray, i, j, k)   i    0
-@diffrule getindex(u::AbstractArray, i, j, k)   j    0
-@diffrule getindex(u::AbstractArray, i, j, k)   k    0
+@nodiff getindex(u::AbstractArray, i)         i
+@nodiff getindex(u::AbstractArray, i, j)      i
+@nodiff getindex(u::AbstractArray, i, j)      j
+@nodiff getindex(u::AbstractArray, i, j, k)   i
+@nodiff getindex(u::AbstractArray, i, j, k)   j
+@nodiff getindex(u::AbstractArray, i, j, k)   k
 
 
 # square root
